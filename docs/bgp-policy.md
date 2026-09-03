@@ -337,7 +337,7 @@ Please refer to the corresponding [antctl page](antctl.md#bgp-commands).
 
 ## BFD conformance notes
 
-BFD is implemented by the embedded gobgp library rather than by Antrea, and as of gobgp v4.8.0 it departs from
+BFD is implemented by the embedded gobgp library rather than by Antrea, and as of gobgp v4.9.0 it departs from
 [RFC 5880](https://datatracker.ietf.org/doc/html/rfc5880) in the three ways listed below. All three affect only the
 control packets a Node sends. How quickly a Node detects a failed peer is unaffected: the detection time is derived
 from the timers the peer advertises, as
