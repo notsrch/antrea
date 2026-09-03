@@ -341,7 +341,9 @@ BFD is implemented by the embedded gobgp library rather than by Antrea, and as o
 [RFC 5880](https://datatracker.ietf.org/doc/html/rfc5880) in the three ways listed below. All three affect only the
 control packets a Node sends. How quickly a Node detects a failed peer is unaffected: the detection time is derived
 from the timers the peer advertises, as
-[Section 6.8.4](https://datatracker.ietf.org/doc/html/rfc5880#section-6.8.4) requires.
+[Section 6.8.4](https://datatracker.ietf.org/doc/html/rfc5880#section-6.8.4) requires. Each departure is tracked by
+an open gobgp issue, linked from its entry; once an issue is closed and the fix is in the gobgp version Antrea ships,
+the corresponding note no longer applies.
 
 - **The transmit interval is not negotiated.**
   [Section 6.8.3](https://datatracker.ietf.org/doc/html/rfc5880#section-6.8.3) requires a system to slow its
@@ -349,15 +351,18 @@ from the timers the peer advertises, as
   ignored, so a Node keeps transmitting at `minTransmitIntervalMilliseconds` even when the peer asks for a slower rate.
   Set `minTransmitIntervalMilliseconds` to a rate the peer is configured to accept: a peer that polices BFD control
   packets may drop the excess and take the session down.
+  Tracked in [osrg/gobgp#3563](https://github.com/osrg/gobgp/issues/3563).
 - **Transmissions are not jittered.**
   [Section 6.8.7](https://datatracker.ietf.org/doc/html/rfc5880#section-6.8.7) requires up to 25% jitter so that
   sessions do not synchronise with one another. Every BFD session on a Node therefore transmits in lockstep, which
   concentrates the packets of a Node with many BFD-enabled peers into bursts.
+  Tracked in [osrg/gobgp#3562](https://github.com/osrg/gobgp/issues/3562).
 - **The transmit rate is not reduced while the session is down.**
   [Section 6.8.3](https://datatracker.ietf.org/doc/html/rfc5880#section-6.8.3) requires a system to back off to no
   faster than one packet per second while the session is not up. Enabling BFD towards a peer that never answers, for
   example one that does not have BFD configured, therefore produces a steady stream of unanswered packets rather than
   a slow probe. The BGP session itself is unaffected.
+  Tracked in [osrg/gobgp#3564](https://github.com/osrg/gobgp/issues/3564).
 
 A further consideration is not a conformance question but is worth weighing before choosing aggressive timers: this BFD
 runs in the antrea-agent process, not in the kernel or in hardware. If the agent is starved of CPU for longer than the
