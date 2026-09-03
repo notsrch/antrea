@@ -132,16 +132,18 @@ The `bgpPeers` field lists the BGP peers to which the advertisements are sent.
   The default value is 1.
 - `gracefulRestartTimeSeconds`: Specifies how long the BGP peer waits for the BGP session to re-establish after a
   restart before deleting stale routes, with a range of 1 to 3600 seconds. The default value is 120 seconds.
-- `bfd`: Enables Bidirectional Forwarding Detection (RFC 5880) towards the BGP peer, for failure detection much faster
-  than the BGP hold timer can provide. When the BFD session transitions from up to down, the BGP session is reset
-  immediately, without waiting for the BGP hold timer to expire. If the BFD session never comes up (e.g., the peer does
-  not support or enable BFD), the BGP session is not affected. BFD is only supported for directly connected peers
-  (`multihopTTL` of 1). BFD control packets are exchanged on UDP port 3784, using a source port in the range
-  49152-65535, and are sent with an IP TTL of 255 as
+- `bfd`: Configures Bidirectional Forwarding Detection (RFC 5880) towards the BGP peer, for failure detection much
+  faster than the BGP hold timer can provide. BFD runs only when `bfd.enabled` is `true`. When the BFD session
+  transitions from up to down, the BGP session is reset immediately, without waiting for the BGP hold timer to expire.
+  If the BFD session never comes up (e.g., the peer does not support or enable BFD), the BGP session is not affected.
+  BFD is only supported for directly connected peers (`multihopTTL` of 1). BFD control packets are exchanged on UDP
+  port 3784, using a source port in the range 49152-65535, and are sent with an IP TTL of 255 as
   [RFC 5881](https://datatracker.ietf.org/doc/html/rfc5881#section-5) requires. This traffic must be allowed by the host
   firewall in both directions: antrea-agent does not install rules for it, just as it does not for the BGP port itself.
   Because the packets have to arrive with a TTL of 255, they cannot cross a router, which is a second reason BFD is
   limited to directly connected peers.
+  - `enabled`: Whether BFD runs towards the peer. This field is required, so that BFD can be turned off by setting it
+    to `false` while the other fields keep their values.
   - `minReceiveIntervalMilliseconds`: The minimum interval at which the Node is capable of receiving BFD control
     packets, in milliseconds. The peer adjusts its transmission rate to be no faster than this value. The range is 10
     to 60000 and the default value is 300.
@@ -295,8 +297,9 @@ In this example, BFD is enabled towards the BGP peer. With the default parameter
 direction and a detection multiplier of 3), a connectivity failure to the peer is detected in less than a second, and
 the BGP session is reset immediately, so that the peer stops forwarding traffic through this Node without waiting for
 the BGP hold timer (90 seconds by default) to expire. The hold timer still acts as a backstop, e.g. if BFD is not
-running. An empty `bfd: {}` is enough to enable BFD with the default parameters; the values below are shown for
-illustration.
+running. Setting only `enabled: true` is enough to run BFD with the default parameters; the interval and multiplier
+values below are shown for illustration. Setting `enabled: false` stops BFD towards the peer while leaving the other
+values in place for the next time it is turned on.
 
 ```yaml
 apiVersion: crd.antrea.io/v1alpha1
@@ -315,6 +318,7 @@ spec:
     - address: 192.168.77.200
       asn: 65001
       bfd:
+        enabled: true
         minReceiveIntervalMilliseconds: 300
         minTransmitIntervalMilliseconds: 300
         detectionMultiplier: 3

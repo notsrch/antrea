@@ -650,6 +650,7 @@ func TestBGPPolicyUpdate(t *testing.T) {
 		&confederationConfig{100, sets.New[uint32](uint32(65001))})
 	ipv4Peer1WithBFD := *ipv4Peer1.DeepCopy()
 	ipv4Peer1WithBFD.BFD = &v1alpha1.BFDConfig{
+		Enabled:                         true,
 		MinReceiveIntervalMilliseconds:  ptr.To(int32(300)),
 		MinTransmitIntervalMilliseconds: ptr.To(int32(300)),
 		DetectionMultiplier:             ptr.To(int32(3)),

@@ -206,6 +206,7 @@ func TestConvertPeerConfigToGoBGPPeer(t *testing.T) {
 			MultihopTTL:                ptr.To(int32(2)),
 			GracefulRestartTimeSeconds: ptr.To(int32(120)),
 			BFD: &v1alpha1.BFDConfig{
+				Enabled:                         true,
 				MinReceiveIntervalMilliseconds:  ptr.To(int32(300)),
 				MinTransmitIntervalMilliseconds: ptr.To(int32(500)),
 				DetectionMultiplier:             ptr.To(int32(4)),
@@ -236,6 +237,24 @@ func TestConvertPeerConfigToGoBGPPeer(t *testing.T) {
 	}
 
 	peer, err = convertPeerConfigToGoBGPPeer(peerConfigWithoutBFD)
+	assert.NoError(t, err)
+	assert.Nil(t, peer.GetBfd())
+
+	// A BFD configuration that is present but not enabled must not turn BFD on, whatever its other fields hold.
+	peerConfigWithDisabledBFD := bgp.PeerConfig{
+		BGPPeer: &v1alpha1.BGPPeer{
+			Address: "192.168.0.1",
+			ASN:     65000,
+			BFD: &v1alpha1.BFDConfig{
+				Enabled:                         false,
+				MinReceiveIntervalMilliseconds:  ptr.To(int32(300)),
+				MinTransmitIntervalMilliseconds: ptr.To(int32(500)),
+				DetectionMultiplier:             ptr.To(int32(4)),
+			},
+		},
+	}
+
+	peer, err = convertPeerConfigToGoBGPPeer(peerConfigWithDisabledBFD)
 	assert.NoError(t, err)
 	assert.Nil(t, peer.GetBfd())
 }

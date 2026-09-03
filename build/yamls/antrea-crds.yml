@@ -539,7 +539,7 @@ spec:
                       - address
                       - asn
                     x-kubernetes-validations:
-                      - rule: "!has(self.bfd) || !has(self.multihopTTL) || self.multihopTTL <= 1"
+                      - rule: "!has(self.bfd) || !self.bfd.enabled || !has(self.multihopTTL) || self.multihopTTL <= 1"
                         message: "bfd is not supported for multihop BGP peers (multihopTTL greater than 1)"
                     properties:
                       address:
@@ -572,7 +572,11 @@ spec:
                         default: 120
                       bfd:
                         type: object
+                        required:
+                          - enabled
                         properties:
+                          enabled:
+                            type: boolean
                           minReceiveIntervalMilliseconds:
                             type: integer
                             format: int32

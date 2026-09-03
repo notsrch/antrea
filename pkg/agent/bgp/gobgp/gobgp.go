@@ -340,7 +340,7 @@ func convertPeerConfigToGoBGPPeer(peerConfig bgp.PeerConfig) (*gobgpapi.Peer, er
 			RestartTime: uint32(*peerConfig.GracefulRestartTimeSeconds),
 		}
 	}
-	if peerConfig.BFD != nil {
+	if peerConfig.BFD != nil && peerConfig.BFD.Enabled {
 		bfdConfig := &gobgpapi.BfdPeerConfig{Enabled: true}
 		// The gobgp API expects the BFD intervals in microseconds.
 		if peerConfig.BFD.MinReceiveIntervalMilliseconds != nil {
